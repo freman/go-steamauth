@@ -76,6 +76,13 @@ func (s *steamWeb) SetJar(cookieJar http.CookieJar) *steamWeb {
 	return s
 }
 
+// SetJarFromUser set this request's cookiejar from an already
+// authenticated user via UserLogin.
+func (s *steamWeb) SetJarFromUser(user *UserLogin) *steamWeb {
+	s.Jar = user.cookieJar
+	return s
+}
+
 // SetHeaders set this requests headers
 func (s *steamWeb) SetHeaders(headers http.Header) *steamWeb {
 	s.headers = headers
