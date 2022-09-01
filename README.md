@@ -24,51 +24,77 @@ To remove the authenticator from your account you will need a working session (s
 
 ### Authenticating
 
-		auth := steamauth.NewUserLogin("username", "password")
-		res, err := auth.DoLogin()
-		// err usually means something went wrong in the library or connecting to steam
-		switch res {
-		case steamauth.NeedCaptcha:
-			fmt.Printf("Requires captcha: %s\n", userLogin.CaptchaURL())
-		case steamauth.Need2FA:
-			fmt.Println("Need two factor code, get this from SteamGuard on your phone (or SteamGuardAccount if it's registered)")
-		case steamauth.NeedEmail:
-			fmt.Println("Code was sent to your email")
-		case steamauth.LoginOkay:
-			fmt.Println("Logged in!")
-		}
+```golang
+	auth := steamauth.NewUserLogin("username", "password")
+	res, err := auth.DoLogin()
+	// err usually means something went wrong in the library or connecting to steam
+	switch res {
+	case steamauth.NeedCaptcha:
+		fmt.Printf("Requires captcha: %s\n", userLogin.CaptchaURL())
+	case steamauth.Need2FA:
+		fmt.Println("Need two factor code, get this from SteamGuard on your phone (or SteamGuardAccount if it's registered)")
+	case steamauth.NeedEmail:
+		fmt.Println("Code was sent to your email")
+	case steamauth.LoginOkay:
+		fmt.Println("Logged in!")
+	}
+```
 
 ### Begin registration
 
-		linker := steamauth.NewAuthenticatorLinker(userLogin.Session)
-		linkres, err := linker.AddAuthenticator()
-		// Again err usually means something went wrong in the library or connecting to steam
-		switch linkres {
-		case steamauth.MustProvidePhoneNumber:
-			fmt.Println("Account doesn't have a phone number associated with it and you didn't provide one")
-		case steamauth.MustRemovePhoneNumber:
-			fmt.Println("Account already has a phone number associated with it and you provided one")
-		case steamauth.AwaitingFinalization:
-			fmt.Println("A message has been sent to the given mobile number, call FinalizeAddAuthenticator(smscode)")
-		}
+```golang
+	linker := steamauth.NewAuthenticatorLinker(userLogin.Session)
+	linkres, err := linker.AddAuthenticator()
+	// Again err usually means something went wrong in the library or connecting to steam
+	switch linkres {
+	case steamauth.MustProvidePhoneNumber:
+		fmt.Println("Account doesn't have a phone number associated with it and you didn't provide one")
+	case steamauth.MustRemovePhoneNumber:
+		fmt.Println("Account already has a phone number associated with it and you provided one")
+	case steamauth.AwaitingFinalization:
+		fmt.Println("A message has been sent to the given mobile number, call FinalizeAddAuthenticator(smscode)")
+	}
+```
 
 ### Finalize registration
 
-		finres, err := linker.FinalizeAddAuthenticator(code)
-		switch finres {
-		case steamauth.BadSMSCode:
-			fmt.Println("You done typoed son")
-		case steamauth.UnableToGenerateCorrectCodes:
-			fmt.Println("Steam doesn't like us, even after 30 tries")
-		case steamauth.Success
-			fmt.Println("Everything is awsome")
-		}
+```golang
+	finres, err := linker.FinalizeAddAuthenticator(code)
+	switch finres {
+	case steamauth.BadSMSCode:
+		fmt.Println("You done typoed son")
+	case steamauth.UnableToGenerateCorrectCodes:
+		fmt.Println("Steam doesn't like us, even after 30 tries")
+	case steamauth.Success
+		fmt.Println("Everything is awsome")
+	}
+```
 
 ### Save state
 
 Once you've finalized your registration you should absolutly save a copy of the `SteamGuardAccount` instance
 
-		fmt.Println(linker.LinkedAccount.Export())
+```golang
+	fmt.Println(linker.LinkedAccount.Export())
+```
+
+## Tips
+
+### Proxy
+
+Go nativly supports proxy from environment for http requests with no code modification
+
+```bash
+	export HTTP_PROXY="http://proxyIp:proxyPort"
+```
+
+or
+
+```golang
+	os.Setenv("HTTP_PROXY", "http://proxyIp:proxyPort")
+```
+
+Will do exactly what you expect it to do.
 
 ## Example
 
